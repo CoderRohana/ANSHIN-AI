@@ -11,11 +11,8 @@ st.set_page_config(page_title="Anshin AI", page_icon="🌸", layout="centered")
 
 st.markdown("""
 <style>
-
-/* ─── GOOGLE FONTS ─── */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap');
 
-/* ─── CSS VARIABLES ─── */
 :root {
     --sakura-blush:  #f9d6df;
     --sakura-petal:  #f4afc2;
@@ -26,7 +23,6 @@ st.markdown("""
     --sakura-stem:   #7a5c6e;
 }
 
-/* ─── GLOBAL — only non-input elements ─── */
 html, body {
     font-family: 'Zen Kaku Gothic New', sans-serif !important;
 }
@@ -35,7 +31,6 @@ p, span, label, h1, h2, h3, h4, li, .stMarkdown {
     color: var(--sakura-ink) !important;
 }
 
-/* ─── APP BACKGROUND ─── */
 .stApp {
     background:
         radial-gradient(ellipse at 15% 10%, rgba(249,214,223,0.6) 0%, transparent 55%),
@@ -45,13 +40,11 @@ p, span, label, h1, h2, h3, h4, li, .stMarkdown {
     min-height: 100vh;
 }
 
-/* ─── BLOCK CONTAINER ─── */
 .block-container {
     max-width: 780px !important;
     padding: 2rem 2rem 5rem !important;
 }
 
-/* ─── TITLE ─── */
 h1 {
     font-family: 'Noto Serif JP', serif !important;
     font-size: 2.3rem !important;
@@ -63,7 +56,6 @@ h1 {
     margin-bottom: 0.2rem !important;
 }
 
-/* ─── CAPTION ─── */
 [data-testid="stCaptionContainer"] p {
     text-align: center !important;
     color: var(--sakura-stem) !important;
@@ -71,7 +63,6 @@ h1 {
     letter-spacing: 0.1em !important;
 }
 
-/* ─── CHAT MESSAGES ─── */
 [data-testid="stChatMessage"] {
     border-radius: 20px !important;
     padding: 1rem 1.3rem !important;
@@ -86,21 +77,18 @@ h1 {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* User bubble */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
     background: linear-gradient(135deg, rgba(244,175,194,0.5), rgba(249,214,223,0.6)) !important;
     border: 1px solid rgba(217,127,163,0.3) !important;
     box-shadow: 0 4px 20px rgba(217,127,163,0.12), inset 0 1px 0 rgba(255,255,255,0.5) !important;
 }
 
-/* Bot bubble */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     background: linear-gradient(135deg, rgba(255,250,252,0.92), rgba(253,240,244,0.85)) !important;
     border: 1px solid rgba(244,175,194,0.35) !important;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9) !important;
 }
 
-/* Chat text */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] span {
     color: var(--sakura-ink) !important;
@@ -109,7 +97,6 @@ h1 {
     font-family: 'Zen Kaku Gothic New', sans-serif !important;
 }
 
-/* ─── CHAT INPUT CONTAINER ─── */
 [data-testid="stChatInput"] {
     border-radius: 24px !important;
     border: 1.5px solid rgba(217,127,163,0.4) !important;
@@ -125,12 +112,6 @@ h1 {
     box-shadow: 0 4px 28px rgba(217,127,163,0.28), inset 0 1px 0 rgba(255,255,255,0.9) !important;
 }
 
-/* ─── TEXTAREA — THE FIX ─────────────────────────────────────
-   We deliberately do NOT set color here.
-   Streamlit's own theme handles the text color inside inputs.
-   Setting color:#000 !important causes invisible text on some
-   themes because the background is also being overridden.
-──────────────────────────────────────────────────────────── */
 [data-testid="stChatInput"] textarea {
     background: transparent !important;
     font-family: 'Zen Kaku Gothic New', sans-serif !important;
@@ -144,7 +125,6 @@ h1 {
     font-style: italic;
 }
 
-/* ─── SEND BUTTON ─── */
 [data-testid="stChatInput"] button {
     background: linear-gradient(135deg, #f4afc2, #d97fa3) !important;
     border: none !important;
@@ -161,7 +141,6 @@ h1 {
     fill: white !important;
 }
 
-/* ─── DIVIDER ─── */
 hr {
     border: none !important;
     height: 1px !important;
@@ -169,7 +148,6 @@ hr {
     margin: 1.5rem 0 !important;
 }
 
-/* ─── SUBHEADER ─── */
 h2, h3 {
     font-family: 'Noto Serif JP', serif !important;
     font-weight: 400 !important;
@@ -177,7 +155,6 @@ h2, h3 {
     letter-spacing: 0.06em !important;
 }
 
-/* ─── CHART ─── */
 [data-testid="stVegaLiteChart"] {
     border-radius: 16px !important;
     background: rgba(255,250,252,0.75) !important;
@@ -187,13 +164,11 @@ h2, h3 {
     box-shadow: 0 4px 20px rgba(217,127,163,0.1) !important;
 }
 
-/* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(217,127,163,0.35); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(217,127,163,0.6); }
 
-/* ─── SAKURA PETALS ─── */
 .petal-wrap {
     position: fixed;
     inset: 0;
@@ -215,7 +190,6 @@ h2, h3 {
     100% { transform: translateY(105vh) translateX(var(--drift)) rotate(var(--spin)); opacity: 0; }
 }
 
-/* ─── KAMON ─── */
 .kamon {
     position: fixed;
     bottom: 1.5rem;
@@ -226,13 +200,9 @@ h2, h3 {
     pointer-events: none;
     z-index: 0;
 }
-
 </style>
 
-<!-- SVG SAKURA PETALS -->
 <div class="petal-wrap" id="petals"></div>
-
-<!-- KAMON CREST WATERMARK -->
 <div class="kamon">
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <circle cx="50" cy="50" r="46" fill="none" stroke="#d97fa3" stroke-width="2"/>
@@ -271,12 +241,10 @@ h2, h3 {
 </script>
 """, unsafe_allow_html=True)
 
-
-# ── MODEL LOADING ──────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_models():
     tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
-    model     = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-small")
+    model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-small")
     emotion_model = pipeline(
         "text-classification",
         model="j-hartmann/emotion-english-distilroberta-base",
@@ -286,18 +254,17 @@ def load_models():
 
 tokenizer, model, emotion_model = load_models()
 
-with open('intents.json', 'r') as f:
-    intents = json.load(f)
+try:
+    with open('intents.json', 'r', encoding='utf-8') as f:
+        intents = json.load(f)
+except FileNotFoundError:
+    intents = {"intents": []}
 
-
-# ── HELPERS ────────────────────────────────────────────────────────────────────
 def detect_emotion(text):
     result = emotion_model(text)[0][0]
     return result['label'].lower()
 
-
 def therapist_response(user_input, base_response, emotion):
-    # Map the distilroberta labels to warm responses
     responses = {
         "sadness": (
             "ごめんね、つらかったんだね。💗\n\n"
@@ -324,14 +291,12 @@ def therapist_response(user_input, base_response, emotion):
             "Oh, that's unexpected! How are you feeling about it?"
         ),
         "disgust": (
-            "それは嫌だったね。🌿\n\n"
+            "それは嫌だったね. 🌿\n\n"
             "That sounds really uncomfortable. Would you like to share what happened?"
         ),
     }
     return responses.get(emotion, base_response)
 
-
-# ── SESSION STATE ──────────────────────────────────────────────────────────────
 for key, default in [
     ("chat_history_ids", None),
     ("messages", []),
@@ -340,17 +305,13 @@ for key, default in [
     if key not in st.session_state:
         st.session_state[key] = default
 
-
-# ── HEADER ────────────────────────────────────────────────────────────────────
 st.title("🌸 Anshin AI · 安心 AI")
 st.caption("安心して話していいよ　— You can talk freely here 💗")
 
-# ── CHAT HISTORY ───────────────────────────────────────────────────────────────
 for sender, msg in st.session_state.messages:
     with st.chat_message("user" if sender == "You" else "assistant"):
         st.markdown(msg)
 
-# ── INPUT ──────────────────────────────────────────────────────────────────────
 user_input = st.chat_input("今日はどんな気持ち？  ·  How are you feeling today…")
 
 if user_input:
@@ -364,8 +325,7 @@ if user_input:
     with st.chat_message("assistant"):
         thinking = st.empty()
         thinking.markdown("🌸 *Anshin is listening…*")
-        time.sleep(1)
-
+        
         new_input_ids = tokenizer.encode(user_input + tokenizer.eos_token, return_tensors='pt')
         bot_input_ids = (
             torch.cat([st.session_state.chat_history_ids, new_input_ids], dim=-1)
@@ -374,30 +334,32 @@ if user_input:
         )
 
         st.session_state.chat_history_ids = model.generate(
-            bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id
+            bot_input_ids, 
+            max_length=1000, 
+            pad_token_id=tokenizer.eos_token_id
         )
 
-        base_response = tokenizer.decode(
+        decoded_response = tokenizer.decode(
             st.session_state.chat_history_ids[:, bot_input_ids.shape[-1]:][0],
             skip_special_tokens=True
         )
 
-        final_response = therapist_response(user_input, base_response, emotion)
+        final_response = therapist_response(user_input, decoded_response, emotion)
 
-        # Intent pattern override
-        for intent in intents['intents']:
-            for pattern in intent["patterns"]:
+        matched_intent = False
+        for intent in intents.get('intents', []):
+            for pattern in intent.get("patterns", []):
                 if pattern.lower() in user_input.lower():
                     final_response = random.choice(intent["responses"])
+                    matched_intent = True
                     break
+            if matched_intent: break
 
         thinking.markdown(final_response)
-
-    st.session_state.messages.append(("Anshin AI", final_response))
+        st.session_state.messages.append(("Anshin AI", final_response))
+    
     st.rerun()
 
-
-# ── EMOTION ANALYTICS ──────────────────────────────────────────────────────────
 if st.session_state.memory:
     st.divider()
     st.subheader("📊 Emotion Journal · 感情の記録")
