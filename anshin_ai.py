@@ -12,20 +12,76 @@ st.set_page_config(page_title="Anshin AI", page_icon="🌸")
 
 st.markdown("""
 <style>
-html, body, [class*="css"] {
+
+/* GLOBAL TEXT FIX */
+html, body, [class*="css"], p, span, div {
     color: #000000 !important;
-    font-family: 'Segoe UI', sans-serif;
+    font-size: 18px !important;
+    font-weight: 500;
 }
 
+/* BACKGROUND */
 .stApp {
     background: linear-gradient(180deg, #fff0f5 0%, #ffe4e1 100%);
 }
 
-/* Sakura petals animation */
+/* CHAT CONTAINER */
+[data-testid="stChatMessage"] {
+    font-size: 18px !important;
+    color: #000000 !important;
+}
+
+/* USER BUBBLE */
+[data-testid="stChatMessage"][data-testid*="user"] {
+    background-color: #ffb6c1 !important;
+    color: black !important;
+    border-radius: 16px !important;
+    padding: 14px !important;
+    margin: 10px 0 !important;
+    border: 2px solid #ff69b4;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* BOT BUBBLE */
+[data-testid="stChatMessage"][data-testid*="assistant"] {
+    background-color: #ffffff !important;
+    color: black !important;
+    border-radius: 16px !important;
+    padding: 14px !important;
+    margin: 10px 0 !important;
+    border: 2px solid #ffc0cb;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* FORCE TEXT INSIDE BUBBLES */
+[data-testid="stChatMessage"] * {
+    color: #000000 !important;
+    font-size: 18px !important;
+}
+
+/* INPUT BOX */
+textarea, input {
+    font-size: 18px !important;
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border-radius: 10px !important;
+}
+
+/* HEADERS */
+h1 {
+    font-size: 36px !important;
+    color: #000000 !important;
+}
+h2, h3 {
+    font-size: 24px !important;
+    color: #000000 !important;
+}
+
+/* SAKURA ANIMATION */
 .sakura {
     position: fixed;
     top: -10px;
-    color: #ffb6c1;
+    font-size: 20px;
     animation: fall linear infinite;
     z-index: 9999;
 }
@@ -36,36 +92,15 @@ html, body, [class*="css"] {
     }
 }
 
-/* Chat bubbles */
-[data-testid="stChatMessage"] {
-    color: black !important;
-    font-size: 16px;
-}
-
-[data-testid="stChatMessage"][data-testid*="user"] {
-    background-color: #ffc0cb !important;
-    border-radius: 12px;
-    padding: 10px;
-}
-
-[data-testid="stChatMessage"][data-testid*="assistant"] {
-    background-color: #ffffff !important;
-    border-radius: 12px;
-    padding: 10px;
-}
-
-/* Input */
-input {
-    color: black !important;
-    background-color: #ffffff !important;
-}
 </style>
 
 <div class="sakura" style="left:10%; animation-duration:10s;">🌸</div>
-<div class="sakura" style="left:30%; animation-duration:12s;">🌸</div>
-<div class="sakura" style="left:50%; animation-duration:9s;">🌸</div>
-<div class="sakura" style="left:70%; animation-duration:11s;">🌸</div>
-<div class="sakura" style="left:90%; animation-duration:13s;">🌸</div>
+<div class="sakura" style="left:25%; animation-duration:12s;">🌸</div>
+<div class="sakura" style="left:40%; animation-duration:9s;">🌸</div>
+<div class="sakura" style="left:55%; animation-duration:11s;">🌸</div>
+<div class="sakura" style="left:70%; animation-duration:13s;">🌸</div>
+<div class="sakura" style="left:85%; animation-duration:10s;">🌸</div>
+
 """, unsafe_allow_html=True)
 
 stemmer = PorterStemmer()
