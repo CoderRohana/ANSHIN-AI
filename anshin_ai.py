@@ -1,4 +1,3 @@
-!pip install streamlit pyngrok transformers torch nltk
 import streamlit as st
 import torch
 import json
