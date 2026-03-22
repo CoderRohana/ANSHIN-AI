@@ -25,7 +25,7 @@ html, body, [class*="css"], p, span, div {
     background: linear-gradient(180deg, #fff0f5 0%, #ffe4e1 100%);
 }
 
-/* CHAT CONTAINER */
+/* CHAT */
 [data-testid="stChatMessage"] {
     font-size: 18px !important;
     color: #000000 !important;
@@ -34,32 +34,30 @@ html, body, [class*="css"], p, span, div {
 /* USER BUBBLE */
 [data-testid="stChatMessage"][data-testid*="user"] {
     background-color: #ffb6c1 !important;
-    color: black !important;
     border-radius: 16px !important;
     padding: 14px !important;
     margin: 10px 0 !important;
     border: 2px solid #ff69b4;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 /* BOT BUBBLE */
 [data-testid="stChatMessage"][data-testid*="assistant"] {
     background-color: #ffffff !important;
-    color: black !important;
     border-radius: 16px !important;
     padding: 14px !important;
     margin: 10px 0 !important;
     border: 2px solid #ffc0cb;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* FORCE TEXT INSIDE BUBBLES */
+/* FORCE TEXT */
 [data-testid="stChatMessage"] * {
     color: #000000 !important;
     font-size: 18px !important;
 }
 
-/* INPUT BOX */
+/* INPUT */
 textarea, input {
     font-size: 18px !important;
     color: #000000 !important;
@@ -70,14 +68,12 @@ textarea, input {
 /* HEADERS */
 h1 {
     font-size: 36px !important;
-    color: #000000 !important;
 }
 h2, h3 {
     font-size: 24px !important;
-    color: #000000 !important;
 }
 
-/* SAKURA ANIMATION */
+/* SAKURA */
 .sakura {
     position: fixed;
     top: -10px;
@@ -111,19 +107,39 @@ def tokenize(sentence):
 def stem(word):
     return stemmer.stem(word.lower())
 
+# 🔥 FIXED EMOTION DETECTOR
 def detect_emotion(text):
-    tokens = [stem(w) for w in tokenize(text)]
+    tokens = tokenize(text)
+
+    text_lower = text.lower()
+    if "not feeling good" in text_lower or "don't feel good" in text_lower:
+        return "sad"
+
     emotions = {
         "happy": ["happy","good","great","fine","ok","cheerful"],
-        "sad": ["sad","lonely","down","empty","depressed"],
+        "sad": ["sad","lonely","down","empty","depressed","bad"],
         "angry": ["angry","hate","annoyed","frustrated"],
         "anxious": ["anxious","worried","scared","stress","nervous"]
     }
-    scores = {}
-    for emo, words in emotions.items():
-        scores[emo] = sum(1 for t in tokens if t in words)
+
+    negations = ["not", "no", "never", "n't"]
+
+    scores = {emo: 0 for emo in emotions}
+
+    for i, word in enumerate(tokens):
+        for emo, keywords in emotions.items():
+            if word in keywords:
+                if i > 0 and tokens[i-1] in negations:
+                    if emo == "happy":
+                        scores["sad"] += 1
+                    else:
+                        scores[emo] -= 1
+                else:
+                    scores[emo] += 1
+
     if max(scores.values()) == 0:
         return "neutral"
+
     return max(scores, key=scores.get)
 
 @st.cache_resource
