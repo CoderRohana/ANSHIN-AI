@@ -1,7 +1,6 @@
 import streamlit as st
 import torch
 import json
-import random
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from collections import Counter
 import pandas as pd
@@ -11,12 +10,6 @@ st.set_page_config(page_title="Anshin AI", page_icon="🌸", layout="centered")
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap');
-
-:root {
-    --bg:#fff0f5;
-    --accent:#f4afc2;
-    --deep:#d97fa3;
-}
 
 html, body, p, span, div {
     color: #111111 !important;
@@ -34,7 +27,7 @@ html, body, p, span, div {
 
 h1 {
     text-align:center !important;
-    color: var(--deep) !important;
+    color: #d97fa3 !important;
     font-family:'Noto Serif JP',serif !important;
 }
 
@@ -48,21 +41,14 @@ h1 {
 [data-testid="stChatMessage"] {
     border-radius: 16px !important;
     padding: 1rem !important;
-    margin: 0.5rem 0 !important;
 }
 
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
     background: #ffc0cb !important;
-    border: 2px solid #ff69b4;
 }
 
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     background: #ffffff !important;
-    border: 2px solid #f4afc2;
-}
-
-[data-testid="stChatMessageContent"] p {
-    color: #000000 !important;
 }
 
 [data-testid="stChatInput"] {
@@ -73,140 +59,100 @@ h1 {
     width: 95%;
     max-width: 720px;
     background: #111111 !important;
-    border: 2px solid #f4afc2 !important;
     border-radius: 25px !important;
-    padding: 8px 12px !important;
 }
 
 [data-testid="stChatInput"] textarea {
-    color: #ffffff !important;
-    font-size: 16px !important;
-    background: transparent !important;
+    color: white !important;
 }
 
-[data-testid="stChatInput"] textarea::placeholder {
-    color: #cccccc !important;
-}
-
-[data-testid="stChatInput"] button {
-    background: #f4afc2 !important;
-    border-radius: 50% !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
 @st.cache_resource
 def load_models():
-    tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
-    model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-small")
+    tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
+    model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
     emotion_model = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base")
     return tokenizer, model, emotion_model
 
 tokenizer, model, emotion_model = load_models()
 
-try:
-    with open('intents.json','r',encoding='utf-8') as f:
-        intents=json.load(f)
-except:
-    intents={"intents":[]}
-
 def detect_emotion(text):
     return emotion_model(text)[0]['label'].lower()
 
-def cbt_response(user_input, emotion):
-    if emotion == "sadness":
-        return f"""ごめんね、つらかったんだね。💗
+def build_prompt(user_input, emotion, history):
+    convo = ""
+    for h in history[-5:]:
+        role = "User" if h["role"] == "user" else "Therapist"
+        convo += f"{role}: {h['content']}\n"
 
-You said: "{user_input}"
+    prompt = f"""
+You are a calm, empathetic therapist using CBT techniques.
+Speak naturally like a human, not like a chatbot.
+Do not repeat phrases.
+Do not say generic things like "I don't understand".
+Guide the user gently.
 
-Let’s gently explore this together:
+Conversation:
+{convo}
 
-• What happened → It sounds like something didn’t go the way you hoped  
-• How it made you feel → Maybe disappointed or heavy inside  
-• Thought check → Does this situation truly define your ability or future?
+User just said: "{user_input}"
+Detected emotion: {emotion}
 
-Try this small step:
-What is one thing you can still control right now?"""
+Respond with:
+- empathy
+- gentle reflection
+- one guiding question
+- optional CBT reframing
 
-    elif emotion == "fear":
-        return f"""大丈夫だよ、ゆっくりでいいよ。🌿
+Therapist:
+"""
+    return prompt
 
-You said: "{user_input}"
+def generate_response(prompt):
+    inputs = tokenizer.encode(prompt, return_tensors='pt')
+    outputs = model.generate(
+        inputs,
+        max_length=inputs.shape[1] + 120,
+        pad_token_id=tokenizer.eos_token_id,
+        do_sample=True,
+        top_k=50,
+        top_p=0.95,
+        temperature=0.85
+    )
+    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return text.split("Therapist:")[-1].strip()
 
-Let’s slow this down:
-
-• What are you afraid might happen?  
-• How likely is that outcome realistically?  
-• If it *did* happen, how would you cope?
-
-Small step:
-Focus only on the next action, not the whole future."""
-
-    elif emotion == "anger":
-        return f"""その気持ちわかるよ。🌸
-
-You said: "{user_input}"
-
-Let’s understand this feeling:
-
-• What triggered this anger?  
-• What expectation was not met?  
-• Is there another way to view the situation?
-
-Try:
-Pause for a moment — what would a calmer version of you say?"""
-
-    elif emotion == "joy":
-        return f"""それはいいね！✨
-
-You said: "{user_input}"
-
-Let’s anchor this feeling:
-
-• What made this moment positive?  
-• Can you recreate this feeling again?  
-
-Hold onto this — it matters."""
-
-    else:
-        return f"""うん、聞いてるよ。💭
-
-You said: "{user_input}"
-
-Tell me more — what’s been on your mind lately?"""
-
-for k,v in [("chat_history_ids",None),("messages",[]),("memory",[]),("show_graph",False)]:
+for k,v in [("history",[]),("memory",[]),("show_graph",False)]:
     if k not in st.session_state:
         st.session_state[k]=v
 
 st.title("🌸 Anshin AI · 安心 AI")
 st.markdown('<div class="tagline">安心して話していいよ — You are safe here, take your time 💗</div>', unsafe_allow_html=True)
 
-for sender,msg in st.session_state.messages:
-    with st.chat_message("user" if sender=="You" else "assistant"):
-        st.markdown(msg)
+for msg in st.session_state.history:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-user_input=st.chat_input("話してみてね… How are you feeling today? 💭")
+user_input = st.chat_input("話してみてね… How are you feeling today? 💭")
 
 if user_input:
-    emotion=detect_emotion(user_input)
+    emotion = detect_emotion(user_input)
+
     st.session_state.memory.append({"text":user_input,"emotion":emotion})
-    st.session_state.messages.append(("You",f"{user_input} · *{emotion}*"))
+    st.session_state.history.append({"role":"user","content":user_input})
 
     with st.chat_message("assistant"):
-        placeholder=st.empty()
-        placeholder.markdown("🌸 *Anshin is listening…*")
+        placeholder = st.empty()
+        placeholder.markdown("🌸 *Anshin is thinking…*")
 
-        final=cbt_response(user_input,emotion)
+        prompt = build_prompt(user_input, emotion, st.session_state.history)
+        response = generate_response(prompt)
 
-        for intent in intents.get('intents',[]):
-            for pattern in intent.get("patterns",[]):
-                if pattern.lower() in user_input.lower():
-                    final=random.choice(intent["responses"])
-                    break
+        placeholder.markdown(response)
 
-        placeholder.markdown(final)
-        st.session_state.messages.append(("Anshin AI",final))
+    st.session_state.history.append({"role":"assistant","content":response})
 
     if "show graph" in user_input.lower():
         st.session_state.show_graph = True
