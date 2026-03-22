@@ -12,7 +12,7 @@ nltk.download('punkt')
 stemmer = PorterStemmer()
 
 def tokenize(sentence):
-    return nltk.word_tokenize(sentence)
+    return sentence.lower().split()
 
 def stem(word):
     return stemmer.stem(word.lower())
