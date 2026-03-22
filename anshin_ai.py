@@ -17,9 +17,13 @@ st.markdown("""
     --sakura-petal:#f4afc2;
     --sakura-deep:#d97fa3;
     --sakura-ink:#2a0f1a;
-    --sakura-mist:#fdf0f4;
     --sakura-white:#fffafc;
     --sakura-stem:#6b4c5c;
+}
+
+html, body {
+    margin:0;
+    padding:0;
 }
 
 html, body, [data-testid="stAppViewContainer"] {
@@ -35,14 +39,24 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .block-container {
-    max-width:780px !important;
-    padding:2rem 2rem 5rem !important;
+    max-width:720px !important;
+    padding:1rem 1rem 6rem !important;
 }
 
+/* MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+    .block-container {
+        padding:1rem 0.7rem 6rem !important;
+    }
+    h1 {
+        font-size:1.8rem !important;
+    }
+}
+
+/* HEADER */
 h1 {
     font-family:'Noto Serif JP',serif !important;
-    font-size:2.3rem !important;
-    font-weight:400 !important;
+    font-size:2.2rem !important;
     color:var(--sakura-deep) !important;
     text-align:center !important;
 }
@@ -52,77 +66,78 @@ h1 {
     color:var(--sakura-stem) !important;
 }
 
+/* CHAT */
 [data-testid="stChatMessage"] {
-    border-radius:20px !important;
-    padding:1.2rem !important;
-    margin:0.8rem 0 !important;
+    border-radius:18px !important;
+    padding:1rem !important;
+    margin:0.6rem 0 !important;
 }
 
 [data-testid="stChatMessageContent"] p {
     color:var(--sakura-ink) !important;
-    font-size:1.05rem !important;
-    line-height:1.7 !important;
+    font-size:1rem !important;
+    line-height:1.6 !important;
 }
 
+/* USER */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    background:rgba(244,175,194,0.5) !important;
+    background:rgba(244,175,194,0.6) !important;
     border:1px solid rgba(217,127,163,0.3) !important;
 }
 
+/* BOT */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     background:rgba(255,250,252,0.95) !important;
     border:1px solid rgba(244,175,194,0.3) !important;
 }
 
+/* INPUT BOX */
 [data-testid="stChatInput"] {
-    border-radius:24px !important;
+    position:fixed !important;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    width:95%;
+    max-width:720px;
     background:rgba(255,250,252,0.98) !important;
-    border:1px solid var(--sakura-petal) !important;
+    border:2px solid #f4afc2 !important;
+    border-radius:30px !important;
+    padding:8px 12px !important;
+    box-shadow:0 6px 20px rgba(0,0,0,0.1);
 }
 
-.petal-wrap {
+[data-testid="stChatInput"] textarea {
+    font-size:16px !important;
+    color:#2a0f1a !important;
+    background:transparent !important;
+}
+
+[data-testid="stChatInput"] textarea::placeholder {
+    color:#9c6b7d !important;
+}
+
+[data-testid="stChatInput"] button {
+    background-color:#f4afc2 !important;
+    border-radius:50% !important;
+}
+
+[data-testid="stChatInput"] button:hover {
+    background-color:#d97fa3 !important;
+}
+
+/* FOOTER */
+.footer {
     position:fixed;
-    inset:0;
-    pointer-events:none;
-    overflow:hidden;
-    z-index:9999;
-}
-
-.petal {
-    position:absolute;
-    top:-60px;
-    animation:petalFall linear infinite;
-}
-
-@keyframes petalFall {
-    0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:0;}
-    5%{opacity:0.8;}
-    100%{transform:translateY(105vh) translateX(var(--drift)) rotate(var(--spin));opacity:0;}
+    bottom:0;
+    width:100%;
+    text-align:center;
+    font-size:12px;
+    color:#6b4c5c;
+    padding:5px;
 }
 </style>
 
-<div class="petal-wrap" id="petals"></div>
-
-<script>
-(function(){
-var wrap=document.getElementById('petals');
-if(!wrap)return;
-var colors=['#f9c9d8','#f4afc2','#fce4ec','#f8bbd0'];
-for(var i=0;i<12;i++){
-var el=document.createElement('div');
-el.className='petal';
-var size=10+Math.random()*10;
-var left=Math.random()*100;
-var dur=12+Math.random()*10;
-var drift=((Math.random()-0.5)*140).toFixed(1);
-var spin=(200+Math.random()*300).toFixed(1);
-var color=colors[Math.floor(Math.random()*colors.length)];
-el.style.cssText='left:'+left+'%;width:'+size+'px;height:'+size+'px;animation-duration:'+dur+'s;--drift:'+drift+'px;--spin:'+spin+'deg;';
-el.innerHTML='<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="11" ry="18" fill="'+color+'" opacity="0.7"/></svg>';
-wrap.appendChild(el);
-}
-})();
-</script>
+<div class="footer">Made with 💗 by Rohan Dutta</div>
 """, unsafe_allow_html=True)
 
 @st.cache_resource
@@ -165,7 +180,7 @@ for sender,msg in st.session_state.messages:
     with st.chat_message("user" if sender=="You" else "assistant"):
         st.markdown(msg)
 
-user_input=st.chat_input("今日はどんな気持ち？ · How are you feeling today…")
+user_input=st.chat_input("話してみてね… How are you feeling today? 💭")
 
 if user_input:
     emotion=detect_emotion(user_input)
