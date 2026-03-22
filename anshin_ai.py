@@ -18,7 +18,6 @@ st.markdown("""
     --deep:#d97fa3;
 }
 
-/* GLOBAL */
 html, body, p, span, div {
     color: #111111 !important;
     font-size: 17px !important;
@@ -33,38 +32,39 @@ html, body, p, span, div {
     padding: 1rem 1rem 6rem !important;
 }
 
-/* HEADER */
 h1 {
     text-align:center !important;
     color: var(--deep) !important;
     font-family:'Noto Serif JP',serif !important;
 }
 
-/* CHAT */
+.tagline {
+    text-align:center;
+    font-size:14px;
+    color:#6b4c5c;
+    margin-bottom:20px;
+}
+
 [data-testid="stChatMessage"] {
     border-radius: 16px !important;
     padding: 1rem !important;
     margin: 0.5rem 0 !important;
 }
 
-/* USER */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
     background: #ffc0cb !important;
     border: 2px solid #ff69b4;
 }
 
-/* BOT */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
     background: #ffffff !important;
     border: 2px solid #f4afc2;
 }
 
-/* TEXT */
 [data-testid="stChatMessageContent"] p {
     color: #000000 !important;
 }
 
-/* INPUT BOX */
 [data-testid="stChatInput"] {
     position: fixed !important;
     bottom: 20px;
@@ -78,19 +78,16 @@ h1 {
     padding: 8px 12px !important;
 }
 
-/* TYPING TEXT (WHITE) */
 [data-testid="stChatInput"] textarea {
     color: #ffffff !important;
     font-size: 16px !important;
     background: transparent !important;
 }
 
-/* PLACEHOLDER */
 [data-testid="stChatInput"] textarea::placeholder {
     color: #cccccc !important;
 }
 
-/* BUTTON */
 [data-testid="stChatInput"] button {
     background: #f4afc2 !important;
     border-radius: 50% !important;
@@ -116,21 +113,74 @@ except:
 def detect_emotion(text):
     return emotion_model(text)[0]['label'].lower()
 
-def therapist_response(emotion, base):
-    mapping={
-        "sadness":"ごめんね、つらかったんだね。💗\n\nI'm really sorry you're feeling this way. Tell me what’s on your mind.",
-        "fear":"大丈夫だよ、ゆっくりでいいよ。🌿\n\nYou seem anxious. What’s worrying you?",
-        "anger":"その気持ちわかるよ。🌸\n\nI hear your frustration. What happened?",
-        "joy":"それはいいね！✨\n\nThat’s wonderful. Tell me more!"
-    }
-    return mapping.get(emotion, base)
+def cbt_response(user_input, emotion):
+    if emotion == "sadness":
+        return f"""ごめんね、つらかったんだね。💗
 
-for k,v in [("chat_history_ids",None),("messages",[]),("memory",[])]:
+You said: "{user_input}"
+
+Let’s gently explore this together:
+
+• What happened → It sounds like something didn’t go the way you hoped  
+• How it made you feel → Maybe disappointed or heavy inside  
+• Thought check → Does this situation truly define your ability or future?
+
+Try this small step:
+What is one thing you can still control right now?"""
+
+    elif emotion == "fear":
+        return f"""大丈夫だよ、ゆっくりでいいよ。🌿
+
+You said: "{user_input}"
+
+Let’s slow this down:
+
+• What are you afraid might happen?  
+• How likely is that outcome realistically?  
+• If it *did* happen, how would you cope?
+
+Small step:
+Focus only on the next action, not the whole future."""
+
+    elif emotion == "anger":
+        return f"""その気持ちわかるよ。🌸
+
+You said: "{user_input}"
+
+Let’s understand this feeling:
+
+• What triggered this anger?  
+• What expectation was not met?  
+• Is there another way to view the situation?
+
+Try:
+Pause for a moment — what would a calmer version of you say?"""
+
+    elif emotion == "joy":
+        return f"""それはいいね！✨
+
+You said: "{user_input}"
+
+Let’s anchor this feeling:
+
+• What made this moment positive?  
+• Can you recreate this feeling again?  
+
+Hold onto this — it matters."""
+
+    else:
+        return f"""うん、聞いてるよ。💭
+
+You said: "{user_input}"
+
+Tell me more — what’s been on your mind lately?"""
+
+for k,v in [("chat_history_ids",None),("messages",[]),("memory",[]),("show_graph",False)]:
     if k not in st.session_state:
         st.session_state[k]=v
 
 st.title("🌸 Anshin AI · 安心 AI")
-st.caption("安心して話していいよ — You can talk freely here 💗")
+st.markdown('<div class="tagline">安心して話していいよ — You are safe here, take your time 💗</div>', unsafe_allow_html=True)
 
 for sender,msg in st.session_state.messages:
     with st.chat_message("user" if sender=="You" else "assistant"):
@@ -147,21 +197,7 @@ if user_input:
         placeholder=st.empty()
         placeholder.markdown("🌸 *Anshin is listening…*")
 
-        new_ids=tokenizer.encode(user_input+tokenizer.eos_token,return_tensors='pt')
-        bot_ids=torch.cat([st.session_state.chat_history_ids,new_ids],dim=-1) if st.session_state.chat_history_ids is not None else new_ids
-
-        st.session_state.chat_history_ids=model.generate(
-            bot_ids,
-            max_length=300,
-            pad_token_id=tokenizer.eos_token_id
-        )
-
-        base=tokenizer.decode(
-            st.session_state.chat_history_ids[:,bot_ids.shape[-1]:][0],
-            skip_special_tokens=True
-        )
-
-        final=therapist_response(emotion,base)
+        final=cbt_response(user_input,emotion)
 
         for intent in intents.get('intents',[]):
             for pattern in intent.get("patterns",[]):
@@ -177,7 +213,7 @@ if user_input:
 
     st.rerun()
 
-if st.session_state.get("show_graph", False) and st.session_state.memory:
+if st.session_state.show_graph and st.session_state.memory:
     st.divider()
     st.subheader("📊 Emotion Journal")
     emotions=[m["emotion"] for m in st.session_state.memory]
