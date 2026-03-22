@@ -1,19 +1,21 @@
 import streamlit as st
-import torch
 import json
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-from collections import Counter
 import pandas as pd
+from collections import Counter
+from transformers import pipeline
+from openai import OpenAI
 
 st.set_page_config(page_title="Anshin AI", page_icon="🌸", layout="centered")
+
+client = OpenAI()
 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap');
 
-html, body, p, span, div {
-    color: #111111 !important;
-    font-size: 17px !important;
+html, body {
+    font-family:'Zen Kaku Gothic New',sans-serif !important;
+    color:#111 !important;
 }
 
 .stApp {
@@ -21,13 +23,13 @@ html, body, p, span, div {
 }
 
 .block-container {
-    max-width: 720px !important;
-    padding: 1rem 1rem 6rem !important;
+    max-width:720px !important;
+    padding:1rem 1rem 6rem !important;
 }
 
 h1 {
     text-align:center !important;
-    color: #d97fa3 !important;
+    color:#d97fa3 !important;
     font-family:'Noto Serif JP',serif !important;
 }
 
@@ -39,90 +41,96 @@ h1 {
 }
 
 [data-testid="stChatMessage"] {
-    border-radius: 16px !important;
-    padding: 1rem !important;
+    border-radius:16px !important;
+    padding:1rem !important;
 }
 
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    background: #ffc0cb !important;
+    background:#ffc0cb !important;
 }
 
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-    background: #ffffff !important;
+    background:#ffffff !important;
 }
 
 [data-testid="stChatInput"] {
-    position: fixed !important;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 95%;
-    max-width: 720px;
-    background: #111111 !important;
-    border-radius: 25px !important;
+    position:fixed !important;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:95%;
+    max-width:720px;
+    background:#111 !important;
+    border-radius:25px !important;
 }
 
 [data-testid="stChatInput"] textarea {
-    color: white !important;
+    color:white !important;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
 @st.cache_resource
-def load_models():
-    tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
-    model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
-    emotion_model = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base")
-    return tokenizer, model, emotion_model
+def load_emotion_model():
+    return pipeline(
+        "text-classification",
+        model="j-hartmann/emotion-english-distilroberta-base"
+    )
 
-tokenizer, model, emotion_model = load_models()
+emotion_model = load_emotion_model()
 
 def detect_emotion(text):
     return emotion_model(text)[0]['label'].lower()
 
-def build_prompt(user_input, emotion, history):
+def detect_crisis(text):
+    crisis_keywords = [
+        "suicide", "kill myself", "end my life", "die", "no reason to live",
+        "hopeless", "want to disappear"
+    ]
+    text = text.lower()
+    return any(word in text for word in crisis_keywords)
+
+def generate_response(user_input, emotion, history):
     convo = ""
-    for h in history[-5:]:
+    for h in history[-6:]:
         role = "User" if h["role"] == "user" else "Therapist"
         convo += f"{role}: {h['content']}\n"
 
-    prompt = f"""
-You are a calm, empathetic therapist using CBT techniques.
-Speak naturally like a human, not like a chatbot.
-Do not repeat phrases.
-Do not say generic things like "I don't understand".
-Guide the user gently.
+    system_prompt = f"""
+You are Anshin AI, a deeply empathetic therapist.
 
-Conversation:
-{convo}
+Personality:
+- warm, calm, emotionally intelligent
+- human-like, never robotic
+- supportive but not overly dramatic
 
-User just said: "{user_input}"
-Detected emotion: {emotion}
+Therapy approach (CBT):
+1. Validate emotion
+2. Reflect situation
+3. Identify thinking pattern
+4. Gently reframe
+5. Suggest ONE small action
+6. Ask ONE thoughtful question
 
-Respond with:
-- empathy
-- gentle reflection
-- one guiding question
-- optional CBT reframing
+Emotion detected: {emotion}
 
-Therapist:
+Rules:
+- NEVER repeat phrases
+- NEVER give generic responses
+- ALWAYS be specific
+- Keep responses natural and flowing
 """
-    return prompt
 
-def generate_response(prompt):
-    inputs = tokenizer.encode(prompt, return_tensors='pt')
-    outputs = model.generate(
-        inputs,
-        max_length=inputs.shape[1] + 120,
-        pad_token_id=tokenizer.eos_token_id,
-        do_sample=True,
-        top_k=50,
-        top_p=0.95,
-        temperature=0.85
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": convo + f"\nUser: {user_input}"}
+        ],
+        temperature=0.7
     )
-    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return text.split("Therapist:")[-1].strip()
+
+    return response.choices[0].message.content
 
 for k,v in [("history",[]),("memory",[]),("show_graph",False)]:
     if k not in st.session_state:
@@ -145,10 +153,25 @@ if user_input:
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
-        placeholder.markdown("🌸 *Anshin is thinking…*")
+        placeholder.markdown("🌸 *Anshin is listening…*")
 
-        prompt = build_prompt(user_input, emotion, st.session_state.history)
-        response = generate_response(prompt)
+        if detect_crisis(user_input):
+            response = """ごめんね、今とてもつらい状態かもしれないね。
+
+I'm really glad you shared this with me. You don't have to go through this alone.
+
+If you can, please consider reaching out to someone right now:
+- A trusted friend or family member
+- A mental health professional
+- A local helpline in your country
+
+If you're in immediate danger, please contact emergency services.
+
+You matter. I'm here with you. 💗
+
+Do you want to tell me what’s making things feel this overwhelming?"""
+        else:
+            response = generate_response(user_input, emotion, st.session_state.history)
 
         placeholder.markdown(response)
 
@@ -162,6 +185,7 @@ if user_input:
 if st.session_state.show_graph and st.session_state.memory:
     st.divider()
     st.subheader("📊 Emotion Journal")
-    emotions=[m["emotion"] for m in st.session_state.memory]
-    df=pd.DataFrame(list(Counter(emotions).items()),columns=["Emotion","Count"])
+
+    emotions = [m["emotion"] for m in st.session_state.memory]
+    df = pd.DataFrame(list(Counter(emotions).items()), columns=["Emotion","Count"])
     st.bar_chart(df.set_index("Emotion"))
