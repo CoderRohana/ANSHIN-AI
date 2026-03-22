@@ -10,134 +10,117 @@ st.set_page_config(page_title="Anshin AI", page_icon="🌸", layout="centered")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap');
 
 :root {
-    --sakura-blush:#f9d6df;
-    --sakura-petal:#f4afc2;
+    --sakura-bg:#fff0f5;
+    --sakura-accent:#f4afc2;
     --sakura-deep:#d97fa3;
-    --sakura-ink:#2a0f1a;
-    --sakura-white:#fffafc;
-    --sakura-stem:#6b4c5c;
+    --text-main:#111111;
 }
 
-html, body {
-    margin:0;
-    padding:0;
+/* GLOBAL TEXT FIX */
+html, body, p, span, div {
+    color: var(--text-main) !important;
+    font-size: 17px !important;
+    line-height: 1.6 !important;
 }
 
-html, body, [data-testid="stAppViewContainer"] {
-    font-family:'Zen Kaku Gothic New',sans-serif !important;
-}
-
+/* BACKGROUND */
 .stApp {
-    background:
-        radial-gradient(ellipse at 15% 10%, rgba(249,214,223,0.6) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 90%, rgba(217,127,163,0.3) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(253,240,244,1) 0%, #fce8ef 100%);
-    background-attachment: fixed;
+    background: linear-gradient(180deg,#fff0f5 0%,#ffe4e1 100%);
 }
 
+/* CONTAINER FIX */
 .block-container {
-    max-width:720px !important;
-    padding:1rem 1rem 6rem !important;
-}
-
-/* MOBILE OPTIMIZATION */
-@media (max-width: 768px) {
-    .block-container {
-        padding:1rem 0.7rem 6rem !important;
-    }
-    h1 {
-        font-size:1.8rem !important;
-    }
+    max-width: 720px !important;
+    padding: 1rem 1rem 7rem !important;
 }
 
 /* HEADER */
 h1 {
-    font-family:'Noto Serif JP',serif !important;
-    font-size:2.2rem !important;
-    color:var(--sakura-deep) !important;
     text-align:center !important;
+    color: var(--sakura-deep) !important;
+    font-family:'Noto Serif JP',serif !important;
 }
 
 [data-testid="stCaptionContainer"] p {
     text-align:center !important;
-    color:var(--sakura-stem) !important;
 }
 
-/* CHAT */
+/* CHAT BUBBLES */
 [data-testid="stChatMessage"] {
-    border-radius:18px !important;
-    padding:1rem !important;
-    margin:0.6rem 0 !important;
-}
-
-[data-testid="stChatMessageContent"] p {
-    color:var(--sakura-ink) !important;
-    font-size:1rem !important;
-    line-height:1.6 !important;
+    border-radius: 16px !important;
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
 }
 
 /* USER */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    background:rgba(244,175,194,0.6) !important;
-    border:1px solid rgba(217,127,163,0.3) !important;
+    background: #ffc0cb !important;
+    border: 2px solid #ff69b4;
 }
 
 /* BOT */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
-    background:rgba(255,250,252,0.95) !important;
-    border:1px solid rgba(244,175,194,0.3) !important;
+    background: #ffffff !important;
+    border: 2px solid #f4afc2;
+}
+
+/* TEXT INSIDE CHAT */
+[data-testid="stChatMessageContent"] p {
+    color: #000000 !important;
+    font-size: 17px !important;
 }
 
 /* INPUT BOX */
 [data-testid="stChatInput"] {
-    position:fixed !important;
-    bottom:10px;
-    left:50%;
-    transform:translateX(-50%);
-    width:95%;
-    max-width:720px;
-    background:rgba(255,250,252,0.98) !important;
-    border:2px solid #f4afc2 !important;
-    border-radius:30px !important;
-    padding:8px 12px !important;
-    box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    position: fixed !important;
+    bottom: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 720px;
+    background: white !important;
+    border: 2px solid #f4afc2 !important;
+    border-radius: 25px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
 }
 
+/* INPUT TEXT */
 [data-testid="stChatInput"] textarea {
-    font-size:16px !important;
-    color:#2a0f1a !important;
-    background:transparent !important;
+    font-size: 16px !important;
+    color: black !important;
 }
 
-[data-testid="stChatInput"] textarea::placeholder {
-    color:#9c6b7d !important;
-}
-
+/* BUTTON */
 [data-testid="stChatInput"] button {
-    background-color:#f4afc2 !important;
-    border-radius:50% !important;
+    background: #f4afc2 !important;
+    border-radius: 50% !important;
 }
 
 [data-testid="stChatInput"] button:hover {
-    background-color:#d97fa3 !important;
+    background: #d97fa3 !important;
 }
 
-/* FOOTER */
+/* FOOTER FIX */
 .footer {
-    position:fixed;
-    bottom:0;
-    width:100%;
-    text-align:center;
-    font-size:12px;
-    color:#6b4c5c;
-    padding:5px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(5px);
+    text-align: center;
+    font-size: 13px;
+    padding: 8px;
+    color: #444;
+    border-top: 1px solid #f4afc2;
 }
 </style>
 
-<div class="footer">Made with 💗 by Rohan Dutta</div>
+<div class="footer">🌸 Made with 💗 by Rohan Dutta</div>
 """, unsafe_allow_html=True)
 
 @st.cache_resource
@@ -160,12 +143,10 @@ def detect_emotion(text):
 
 def therapist_response(emotion, base):
     mapping={
-        "sadness":"ごめんね、つらかったんだね。💗\n\nI'm really sorry you're feeling this way. Tell me what’s been weighing on you.",
-        "fear":"大丈夫だよ、ゆっくりでいいよ。🌿\n\nIt sounds like you're anxious. What’s worrying you right now?",
-        "anger":"その気持ち、ちゃんとわかるよ。🌸\n\nI hear your frustration. What happened?",
-        "joy":"それはいいね！✨\n\nThat’s wonderful. What made you feel this way?",
-        "surprise":"そうなんだね 🌸\n\nHow did that make you feel?",
-        "disgust":"それはつらいね。🌿\n\nDo you want to talk about it?"
+        "sadness":"ごめんね、つらかったんだね。💗\n\nI'm really sorry you're feeling this way. Tell me what’s on your mind.",
+        "fear":"大丈夫だよ、ゆっくりでいいよ。🌿\n\nYou seem anxious. What’s worrying you?",
+        "anger":"その気持ちわかるよ。🌸\n\nI hear your frustration. What happened?",
+        "joy":"それはいいね！✨\n\nThat’s wonderful. Tell me more!",
     }
     return mapping.get(emotion, base)
 
@@ -220,7 +201,7 @@ if user_input:
 
 if st.session_state.memory:
     st.divider()
-    st.subheader("📊 Emotion Journal · 感情の記録")
+    st.subheader("📊 Emotion Journal")
     emotions=[m["emotion"] for m in st.session_state.memory]
     df=pd.DataFrame(list(Counter(emotions).items()),columns=["Emotion","Count"])
     st.bar_chart(df.set_index("Emotion"))
