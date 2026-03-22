@@ -10,28 +10,60 @@ st.set_page_config(page_title="Anshin AI", page_icon="🌸")
 
 st.markdown("""
 <style>
-body {
-    background-color: #fff0f5;
+html, body, [class*="css"]  {
+    color: #000000 !important;
+    font-family: 'Segoe UI', sans-serif;
 }
+
 .stApp {
     background: linear-gradient(180deg, #fff0f5 0%, #ffe4e1 100%);
 }
-.chat-bubble-user {
-    background-color: #ffb6c1;
-    padding: 10px;
-    border-radius: 10px;
-    margin: 5px;
-    text-align: right;
+
+/* Chat bubbles */
+[data-testid="stChatMessage"] {
+    color: black !important;
 }
-.chat-bubble-bot {
-    background-color: #ffffff;
+
+[data-testid="stChatMessage"] div {
+    color: black !important;
+}
+
+/* User bubble */
+[data-testid="stChatMessage"][data-testid*="user"] {
+    background-color: #ffccd5 !important;
+    border-radius: 12px;
     padding: 10px;
-    border-radius: 10px;
-    margin: 5px;
+}
+
+/* Bot bubble */
+[data-testid="stChatMessage"][data-testid*="assistant"] {
+    background-color: #ffffff !important;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+/* Input box */
+input {
+    color: black !important;
+    background-color: #ffffff !important;
+}
+
+/* Placeholder text */
+input::placeholder {
+    color: #555 !important;
+}
+
+/* Headers */
+h1, h2, h3, h4 {
+    color: #000000 !important;
+}
+
+/* Divider + memory section */
+hr {
+    border-color: #ffb6c1;
 }
 </style>
 """, unsafe_allow_html=True)
-
 stemmer = PorterStemmer()
 
 def tokenize(sentence):
