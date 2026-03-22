@@ -7,7 +7,7 @@ from openai import OpenAI
 
 st.set_page_config(page_title="Anshin AI", page_icon="🌸", layout="centered")
 
-client = OpenAI()
+client = OpenAI(api_key=st.secrets["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"])
 
 st.markdown("""
 <style>
