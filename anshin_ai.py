@@ -13,42 +13,34 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap');
 
 :root {
-    --sakura-bg:#fff0f5;
-    --sakura-accent:#f4afc2;
-    --sakura-deep:#d97fa3;
-    --text-main:#111111;
+    --bg:#fff0f5;
+    --accent:#f4afc2;
+    --deep:#d97fa3;
 }
 
-/* GLOBAL TEXT FIX */
+/* GLOBAL */
 html, body, p, span, div {
-    color: var(--text-main) !important;
+    color: #111111 !important;
     font-size: 17px !important;
-    line-height: 1.6 !important;
 }
 
-/* BACKGROUND */
 .stApp {
     background: linear-gradient(180deg,#fff0f5 0%,#ffe4e1 100%);
 }
 
-/* CONTAINER FIX */
 .block-container {
     max-width: 720px !important;
-    padding: 1rem 1rem 7rem !important;
+    padding: 1rem 1rem 6rem !important;
 }
 
 /* HEADER */
 h1 {
     text-align:center !important;
-    color: var(--sakura-deep) !important;
+    color: var(--deep) !important;
     font-family:'Noto Serif JP',serif !important;
 }
 
-[data-testid="stCaptionContainer"] p {
-    text-align:center !important;
-}
-
-/* CHAT BUBBLES */
+/* CHAT */
 [data-testid="stChatMessage"] {
     border-radius: 16px !important;
     padding: 1rem !important;
@@ -67,31 +59,35 @@ h1 {
     border: 2px solid #f4afc2;
 }
 
-/* TEXT INSIDE CHAT */
+/* TEXT */
 [data-testid="stChatMessageContent"] p {
     color: #000000 !important;
-    font-size: 17px !important;
 }
 
 /* INPUT BOX */
 [data-testid="stChatInput"] {
     position: fixed !important;
-    bottom: 45px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: 95%;
     max-width: 720px;
-    background: white !important;
+    background: #111111 !important;
     border: 2px solid #f4afc2 !important;
     border-radius: 25px !important;
     padding: 8px 12px !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
 }
 
-/* INPUT TEXT */
+/* TYPING TEXT (WHITE) */
 [data-testid="stChatInput"] textarea {
+    color: #ffffff !important;
     font-size: 16px !important;
-    color: black !important;
+    background: transparent !important;
+}
+
+/* PLACEHOLDER */
+[data-testid="stChatInput"] textarea::placeholder {
+    color: #cccccc !important;
 }
 
 /* BUTTON */
@@ -99,28 +95,7 @@ h1 {
     background: #f4afc2 !important;
     border-radius: 50% !important;
 }
-
-[data-testid="stChatInput"] button:hover {
-    background: #d97fa3 !important;
-}
-
-/* FOOTER FIX */
-.footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(255,255,255,0.8);
-    backdrop-filter: blur(5px);
-    text-align: center;
-    font-size: 13px;
-    padding: 8px;
-    color: #444;
-    border-top: 1px solid #f4afc2;
-}
 </style>
-
-<div class="footer">🌸 Made with 💗 by Rohan Dutta</div>
 """, unsafe_allow_html=True)
 
 @st.cache_resource
@@ -146,7 +121,7 @@ def therapist_response(emotion, base):
         "sadness":"ごめんね、つらかったんだね。💗\n\nI'm really sorry you're feeling this way. Tell me what’s on your mind.",
         "fear":"大丈夫だよ、ゆっくりでいいよ。🌿\n\nYou seem anxious. What’s worrying you?",
         "anger":"その気持ちわかるよ。🌸\n\nI hear your frustration. What happened?",
-        "joy":"それはいいね！✨\n\nThat’s wonderful. Tell me more!",
+        "joy":"それはいいね！✨\n\nThat’s wonderful. Tell me more!"
     }
     return mapping.get(emotion, base)
 
@@ -197,9 +172,12 @@ if user_input:
         placeholder.markdown(final)
         st.session_state.messages.append(("Anshin AI",final))
 
+    if "show graph" in user_input.lower():
+        st.session_state.show_graph = True
+
     st.rerun()
 
-if st.session_state.memory:
+if st.session_state.get("show_graph", False) and st.session_state.memory:
     st.divider()
     st.subheader("📊 Emotion Journal")
     emotions=[m["emotion"] for m in st.session_state.memory]
