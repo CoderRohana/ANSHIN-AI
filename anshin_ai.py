@@ -2,12 +2,35 @@ import streamlit as st
 import torch
 import json
 import random
-import nltk
 from nltk.stem.porter import PorterStemmer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from collections import Counter
 
-nltk.download('punkt')
+st.set_page_config(page_title="Anshin AI", page_icon="🌸")
+
+st.markdown("""
+<style>
+body {
+    background-color: #fff0f5;
+}
+.stApp {
+    background: linear-gradient(180deg, #fff0f5 0%, #ffe4e1 100%);
+}
+.chat-bubble-user {
+    background-color: #ffb6c1;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px;
+    text-align: right;
+}
+.chat-bubble-bot {
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 stemmer = PorterStemmer()
 
@@ -45,7 +68,7 @@ with open('intents.json', 'r') as f:
     intents = json.load(f)
 
 st.title("🌸 Anshin AI (安心AI)")
-st.write("Your AI Mental Health Companion 💙")
+st.write("Your Mental Health Companion 💗")
 
 if "chat_history_ids" not in st.session_state:
     st.session_state.chat_history_ids = None
@@ -56,7 +79,11 @@ if "messages" not in st.session_state:
 if "memory" not in st.session_state:
     st.session_state.memory = []
 
-user_input = st.text_input("You:")
+for sender, msg in st.session_state.messages:
+    with st.chat_message("user" if sender == "You" else "assistant"):
+        st.markdown(msg)
+
+user_input = st.chat_input("Talk to Anshin AI...")
 
 if user_input:
     emotion = detect_emotion(user_input)
@@ -82,13 +109,13 @@ if user_input:
     )
 
     if emotion == "sad":
-        response = "I'm really sorry you're feeling this way. " + response
+        response = "I'm really sorry you're feeling this way. 💗 " + response
     elif emotion == "anxious":
-        response = "Take a deep breath. You're safe. " + response
+        response = "Take a deep breath. You're safe. 🌿 " + response
     elif emotion == "angry":
-        response = "It's okay to feel angry. " + response
+        response = "It's okay to feel angry. 🌸 " + response
     elif emotion == "happy":
-        response = "That's wonderful to hear! " + response
+        response = "That's wonderful to hear! ✨ " + response
 
     for intent in intents['intents']:
         for pattern in intent["patterns"]:
@@ -98,10 +125,10 @@ if user_input:
 
     st.session_state.messages.append(("Anshin AI", response))
 
-for sender, msg in st.session_state.messages:
-    st.write(f"**{sender}:** {msg}")
+    st.rerun()
 
 if st.session_state.memory:
+    st.divider()
     st.subheader("🧠 Emotion Memory")
     emotions = [m["emotion"] for m in st.session_state.memory]
     st.write(Counter(emotions))
