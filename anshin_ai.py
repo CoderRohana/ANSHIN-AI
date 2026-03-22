@@ -2,15 +2,17 @@ import streamlit as st
 import torch
 import json
 import random
+import time
 from nltk.stem.porter import PorterStemmer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from collections import Counter
+import pandas as pd
 
 st.set_page_config(page_title="Anshin AI", page_icon="🌸")
 
 st.markdown("""
 <style>
-html, body, [class*="css"]  {
+html, body, [class*="css"] {
     color: #000000 !important;
     font-family: 'Segoe UI', sans-serif;
 }
@@ -19,51 +21,53 @@ html, body, [class*="css"]  {
     background: linear-gradient(180deg, #fff0f5 0%, #ffe4e1 100%);
 }
 
+/* Sakura petals animation */
+.sakura {
+    position: fixed;
+    top: -10px;
+    color: #ffb6c1;
+    animation: fall linear infinite;
+    z-index: 9999;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(360deg);
+    }
+}
+
 /* Chat bubbles */
 [data-testid="stChatMessage"] {
     color: black !important;
+    font-size: 16px;
 }
 
-[data-testid="stChatMessage"] div {
-    color: black !important;
-}
-
-/* User bubble */
 [data-testid="stChatMessage"][data-testid*="user"] {
-    background-color: #ffccd5 !important;
+    background-color: #ffc0cb !important;
     border-radius: 12px;
     padding: 10px;
 }
 
-/* Bot bubble */
 [data-testid="stChatMessage"][data-testid*="assistant"] {
     background-color: #ffffff !important;
     border-radius: 12px;
     padding: 10px;
 }
 
-/* Input box */
+/* Input */
 input {
     color: black !important;
     background-color: #ffffff !important;
 }
-
-/* Placeholder text */
-input::placeholder {
-    color: #555 !important;
-}
-
-/* Headers */
-h1, h2, h3, h4 {
-    color: #000000 !important;
-}
-
-/* Divider + memory section */
-hr {
-    border-color: #ffb6c1;
-}
 </style>
+
+<div class="sakura" style="left:10%; animation-duration:10s;">🌸</div>
+<div class="sakura" style="left:30%; animation-duration:12s;">🌸</div>
+<div class="sakura" style="left:50%; animation-duration:9s;">🌸</div>
+<div class="sakura" style="left:70%; animation-duration:11s;">🌸</div>
+<div class="sakura" style="left:90%; animation-duration:13s;">🌸</div>
 """, unsafe_allow_html=True)
+
 stemmer = PorterStemmer()
 
 def tokenize(sentence):
@@ -100,7 +104,7 @@ with open('intents.json', 'r') as f:
     intents = json.load(f)
 
 st.title("🌸 Anshin AI (安心AI)")
-st.write("Your Mental Health Companion 💗")
+st.caption("安心して話していいよ 💗")
 
 if "chat_history_ids" not in st.session_state:
     st.session_state.chat_history_ids = None
@@ -122,45 +126,55 @@ if user_input:
     st.session_state.memory.append({"text": user_input, "emotion": emotion})
     st.session_state.messages.append(("You", f"{user_input} ({emotion})"))
 
-    new_input_ids = tokenizer.encode(user_input + tokenizer.eos_token, return_tensors='pt')
+    with st.chat_message("assistant"):
+        thinking = st.empty()
+        thinking.markdown("💬 *Anshin is thinking...*")
+        time.sleep(1)
 
-    if st.session_state.chat_history_ids is not None:
-        bot_input_ids = torch.cat([st.session_state.chat_history_ids, new_input_ids], dim=-1)
-    else:
-        bot_input_ids = new_input_ids
+        new_input_ids = tokenizer.encode(user_input + tokenizer.eos_token, return_tensors='pt')
 
-    st.session_state.chat_history_ids = model.generate(
-        bot_input_ids,
-        max_length=1000,
-        pad_token_id=tokenizer.eos_token_id
-    )
+        if st.session_state.chat_history_ids is not None:
+            bot_input_ids = torch.cat([st.session_state.chat_history_ids, new_input_ids], dim=-1)
+        else:
+            bot_input_ids = new_input_ids
 
-    response = tokenizer.decode(
-        st.session_state.chat_history_ids[:, bot_input_ids.shape[-1]:][0],
-        skip_special_tokens=True
-    )
+        st.session_state.chat_history_ids = model.generate(
+            bot_input_ids,
+            max_length=1000,
+            pad_token_id=tokenizer.eos_token_id
+        )
 
-    if emotion == "sad":
-        response = "I'm really sorry you're feeling this way. 💗 " + response
-    elif emotion == "anxious":
-        response = "Take a deep breath. You're safe. 🌿 " + response
-    elif emotion == "angry":
-        response = "It's okay to feel angry. 🌸 " + response
-    elif emotion == "happy":
-        response = "That's wonderful to hear! ✨ " + response
+        response = tokenizer.decode(
+            st.session_state.chat_history_ids[:, bot_input_ids.shape[-1]:][0],
+            skip_special_tokens=True
+        )
 
-    for intent in intents['intents']:
-        for pattern in intent["patterns"]:
-            if pattern.lower() in user_input.lower():
-                response = random.choice(intent["responses"])
-                break
+        if emotion == "sad":
+            response = "I'm really sorry you're feeling this way. 💗 " + response
+        elif emotion == "anxious":
+            response = "Take a deep breath. You're safe. 🌿 " + response
+        elif emotion == "angry":
+            response = "It's okay to feel angry. 🌸 " + response
+        elif emotion == "happy":
+            response = "That's wonderful to hear! ✨ " + response
+
+        for intent in intents['intents']:
+            for pattern in intent["patterns"]:
+                if pattern.lower() in user_input.lower():
+                    response = random.choice(intent["responses"])
+                    break
+
+        thinking.markdown(response)
 
     st.session_state.messages.append(("Anshin AI", response))
-
     st.rerun()
 
 if st.session_state.memory:
     st.divider()
-    st.subheader("🧠 Emotion Memory")
+    st.subheader("📊 Emotion Analytics")
+
     emotions = [m["emotion"] for m in st.session_state.memory]
-    st.write(Counter(emotions))
+    count = Counter(emotions)
+
+    df = pd.DataFrame(list(count.items()), columns=["Emotion", "Count"])
+    st.bar_chart(df.set_index("Emotion"))
